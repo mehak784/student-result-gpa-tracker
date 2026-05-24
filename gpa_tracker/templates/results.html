@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold">📊 My Results</h4>
+  <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+</div>
+
+<!-- Stats Row -->
+{% set total_subs = namespace(v=0) %}
+{% for sem in semesters %}
+  {% set total_subs.v = total_subs.v + sem.subjects|length %}
+{% endfor %}
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="stat-box">
+      <p>Overall CGPA</p>
+      <h2>{{ cgpa }}</h2>
+      <p>out of 4.0</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-box" style="background: linear-gradient(135deg, #00b09b, #38ef7d);">
+      <p>Total Semesters</p>
+      <h2>{{ semesters|length }}</h2>
+      <p>completed</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-box" style="background: linear-gradient(135deg, #ff5f6d, #ffc371);">
+      <p>Total Subjects</p>
+      <h2>{{ total_subs.v }}</h2>
+      <p>all semesters</p>
+    </div>
+  </div>
+</div>
+
+<!-- Results Per Semester -->
+{% for sem in semesters %}
+<div class="card p-4 mb-4 sem-card">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0">📚 {{ sem.name }}</h5>
+    {% if sem.subjects %}
+      {% set tp = namespace(v=0) %}
+      {% set tc = namespace(v=0) %}
+      {% for s in sem.subjects %}
+        {% set tp.v = tp.v + s.grade_points * s.credit_hours %}
+        {% set tc.v = tc.v + s.credit_hours %}
+      {% endfor %}
+      {% set gpa = tp.v / tc.v %}
+      <span class="badge fs-6
+        {% if gpa >= 3.5 %}bg-success
+        {% elif gpa >= 2.5 %}bg-primary
+        {% elif gpa >= 1.5 %}bg-warning text-dark
+        {% else %}bg-danger{% endif %}">
+        Semester GPA: {{ "%.2f"|format(gpa) }}
+      </span>
+    {% endif %}
+  </div>
+
+  {% if sem.subjects %}
+  <table class="table table-hover mb-0">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Subject</th>
+        <th>Credits</th>
+        <th>Marks</th>
+        <th>Grade</th>
+        <th>Points</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sub in sem.subjects %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td><strong>{{ sub.name }}</strong></td>
+        <td>{{ sub.credit_hours }}</td>
+        <td>{{ sub.marks }}%</td>
+        <td>
+          <span class="badge
+            {% if sub.grade == 'A' %}bg-success
+            {% elif sub.grade == 'B' %}bg-primary
+            {% elif sub.grade == 'C' %}bg-warning text-dark
+            {% elif sub.grade == 'D' %}bg-secondary
+            {% else %}bg-danger{% endif %}">
+            {{ sub.grade }}
+          </span>
+        </td>
+        <td>{{ sub.grade_points }}</td>
+        <td>
+          <span class="badge {% if sub.grade == 'F' %}bg-danger{% else %}bg-success{% endif %}">
+            {% if sub.grade == 'F' %}Failed{% else %}Passed{% endif %}
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="text-muted text-center">No subjects in this semester.</p>
+  {% endif %}
+
+</div>
+{% else %}
+<div class="card p-5 text-center">
+  <div style="font-size:4rem">📭</div>
+  <h5>No results yet!</h5>
+  <p class="text-muted">Add semesters and subjects from the dashboard.</p>
+  <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+</div>
+{% endfor %}
+
+{% endblock %}
