@@ -93,6 +93,22 @@ entered data.
 
 ---
 
+## Preview
+
+### Login
+![Login Page](login.png)
+
+### Dashboard
+![Dashboard](dashboard.png)
+
+### Subjects
+![Subjects](subjects.png)
+
+### Results
+![Results](result.png) 
+
+---
+
 ## Author
 
 **Mehak**
